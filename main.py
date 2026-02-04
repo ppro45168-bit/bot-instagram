@@ -5,53 +5,57 @@ import time
 # --- CONFIGURAZIONE ---
 IG_USER_ID = os.environ.get("IG_USER_ID")
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
-# Immagine di prova (un paesaggio generico)
-FOTO_TEST = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
-DIDASCALIA = "Ciao! Questa è la prima prova automatica dal mio Bot 🚀"
 
-def pubblica_foto():
+# URL DI UN VIDEO MP4 PUBBLICO (Per il test usiamo questo coniglio)
+VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4"
+DIDASCALIA = "Test Reel automatico! 🐰 #bot #python #coding"
+
+def pubblica_reel():
     print("------------------------------------------------")
-    print("AVVIO PROCEDURA DI PUBBLICAZIONE...")
+    print("🎬 AVVIO PUBBLICAZIONE REEL...")
     
-    # PASSO 1: Carichiamo la foto sui server di Facebook
+    # PASSO 1: Carichiamo il Video
+    # Nota: Qui specifichiamo 'media_type': 'REELS'
     url_container = f"https://graph.facebook.com/v19.0/{IG_USER_ID}/media"
     payload = {
-        "image_url": FOTO_TEST,
+        "video_url": VIDEO_URL,
         "caption": DIDASCALIA,
+        "media_type": "REELS", 
         "access_token": ACCESS_TOKEN
     }
     
-    print("Creazione del contenitore media...")
+    print("Caricamento video sui server Meta in corso...")
     r = requests.post(url_container, data=payload)
     
     if r.status_code != 200:
-        print("❌ ERRORE NEL CARICAMENTO:", r.text)
+        print("❌ ERRORE CARICAMENTO:", r.text)
         return
 
     creation_id = r.json().get("id")
-    print(f"✅ Contenitore creato! ID: {creation_id}")
+    print(f"✅ Video caricato! ID: {creation_id}")
     
-    # Aspettiamo un attimo che Facebook elabori la foto
-    time.sleep(5) 
+    # IMPORTANTE: I video ci mettono tempo a essere elaborati.
+    # Aspettiamo 45 secondi per essere sicuri.
+    print("⏳ Attendo 45 secondi che Instagram elabori il video...")
+    time.sleep(45)
 
-    # PASSO 2: Pubblichiamo ufficialmente
+    # PASSO 2: Pubblichiamo
     url_publish = f"https://graph.facebook.com/v19.0/{IG_USER_ID}/media_publish"
     payload_pub = {
         "creation_id": creation_id,
         "access_token": ACCESS_TOKEN
     }
     
-    print("Pubblicazione in corso...")
+    print("🚀 Pubblicazione finale...")
     r_pub = requests.post(url_publish, data=payload_pub)
     
     if r_pub.status_code == 200:
-        print("🚀 FOTO PUBBLICATA CON SUCCESSO! CONTROLLA INSTAGRAM!")
+        print("🎉 REEL PUBBLICATO! VAI A VEDERE!")
     else:
-        print("❌ ERRORE NELLA PUBBLICAZIONE:", r_pub.text)
+        print("❌ ERRORE PUBBLICAZIONE (Forse serviva più tempo?):", r_pub.text)
     print("------------------------------------------------")
 
 if __name__ == "__main__":
-    pubblica_foto()
-    # Questo ciclo serve a non far spegnere subito il bot su Railway
+    pubblica_reel()
     while True:
         time.sleep(60)
